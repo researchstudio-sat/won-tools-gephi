@@ -29,9 +29,15 @@ import org.openide.util.Lookup;
 
 import won.tools.gephi.Colors.ColorTransformer;
 
+import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2Builder;
+
 public class NeedsToGephiExporter {
 	public static void main(String... args) {
 		try {
+			if (args.length == 0 || args.length > 2) {
+				System.out.println("usage: NeedsToGephiExporter sparqlEndpointURI [outputFile]");
+				System.exit(1);
+			}
 			String endpoint = args[0];
 			String outfile = "export.gexf";
 			if (args.length > 1) {
