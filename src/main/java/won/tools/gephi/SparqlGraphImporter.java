@@ -4,6 +4,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -69,6 +71,8 @@ public class SparqlGraphImporter implements Generator {
 					NodeDraft node = container.factory().newNodeDraft(nodeRes.getURI());
 					node.setLabel(label.getString());
 					node.addInterval(start.getValue().toString(), end.getValue().toString());
+					//add timestamp used for video making using python scripting plugin
+					node.setValue("timestamp", (double) DatatypeConverter.parseDateTime(start.getString()).getTime().getTime());
 					node.setValue("NeedState", URI.create(stateRes.getURI()).getFragment());
 					node.setValue("URI", nodeRes.getURI());
 					node.setValue("hasLocation", false);
