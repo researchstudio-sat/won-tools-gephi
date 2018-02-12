@@ -34,15 +34,21 @@ import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2Builder;
 public class NeedsToGephiExporter {
 	public static void main(String... args) {
 		try {
-			if (args.length == 0 || args.length > 2) {
-				System.out.println("usage: NeedsToGephiExporter sparqlEndpointURI [outputFile]");
+			if (args.length == 0 ) {
+				System.out.println("usage: NeedsToGephiExporter sparqlEndpointURI {[sparqlEndpointURI]+}  {-o [outputFile]}");
 				System.exit(1);
 			}
-			String endpoint = args[0];
+			int endpointCount = args.length;
 			String outfile = "export.gexf";
-			if (args.length > 1) {
-				outfile = args[1];
+			
+			if (args.length > 2 && "-o".equals(args[args.length - 2])) {
+				outfile = args[args.length-1];
+				endpointCount = args.length - 2;
 			}
+			
+			String[] endpoints = new String[endpointCount]; 
+			System.arraycopy(args, 0, endpoints, 0, endpointCount);
+			
 			System.out.println("using output file " + outfile);
 
 			// Init a project - and therefore a workspace
@@ -53,7 +59,7 @@ public class NeedsToGephiExporter {
 			// Generate a new random graph into a container
 			Container container = Lookup.getDefault().lookup(Container.Factory.class).newContainer();
 			container.setReport(new Report());
-			SparqlGraphImporter importer = new SparqlGraphImporter(endpoint);
+			SparqlGraphImporter importer = new SparqlGraphImporter(endpoints);
 			importer.generate(container.getLoader());
 
 			// Append container to graph structure
