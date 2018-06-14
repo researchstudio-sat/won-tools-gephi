@@ -137,13 +137,13 @@ public class NeedsToGephiExporter {
 			graph.getNodes().forEach(node -> {
 				nodeSizeFunction.transform(node, graph);
 				colorTransformer.transform(node, partition, node.getAttribute(needStateColumn));
-				if (Boolean.TRUE.equals(node.getAttribute(hasLocationColumn))) {
+				if (hasLocationColumn != null && Boolean.TRUE.equals(node.getAttribute(hasLocationColumn))) {
 					node.setColor(redder.transform(node.getColor()));
 				}
-				if (Boolean.TRUE.equals(node.getAttribute(usedForTestingColumn))) {
+				if (usedForTestingColumn != null && Boolean.TRUE.equals(node.getAttribute(usedForTestingColumn))) {
 					node.setColor(desaturize.transform(node.getColor()));
 				}
-				if (Boolean.TRUE.equals(node.getAttribute(noHintForCounterpartColumn))) {
+				if (noHintForCounterpartColumn != null && Boolean.TRUE.equals(node.getAttribute(noHintForCounterpartColumn))) {
 					node.setColor(greener.transform(node.getColor()));
 				}
 			});

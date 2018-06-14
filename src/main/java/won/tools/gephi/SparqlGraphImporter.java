@@ -65,17 +65,29 @@ public class SparqlGraphImporter implements Generator {
 		try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, query)) {
 			System.out.println("processing edges query results...");				
 			ResultSet results = qexec.execSelect();
+			int resultSize = 0;
 			while (results.hasNext()) {
 				QuerySolution solution = results.next();
 				Resource connRes = solution.getResource("c");
 				Resource nodeFromRes = solution.getResource("s");
 				Resource nodeToRes = solution.getResource("o");
+
+				if (!container.nodeExists(nodeFromRes.getURI())) {
+					System.out.println("omitting connection as " + nodeFromRes.getURI() + " has not been loaded by the node query");
+					continue;
+				}
+				if (!container.nodeExists(nodeToRes.getURI())) {
+					System.out.println("omitting connection as " + nodeToRes.getURI() + " has not been loaded by the node query");
+					continue;
+				}
+				
 				Literal label = solution.getLiteral("label");
 				Literal weight = solution.getLiteral("weight");
 				Resource stateRes = solution.getResource("state");
 				Literal start = solution.getLiteral("start");
 				Literal end = solution.getLiteral("end");
 
+				
 				EdgeDraft edge = container.factory().newEdgeDraft(connRes.getURI());
 				edge.setSource(container.getNode(nodeFromRes.getURI()));
 				edge.setTarget(container.getNode(nodeToRes.getURI()));
@@ -84,8 +96,9 @@ public class SparqlGraphImporter implements Generator {
 				edge.setValue("URI",connRes.getURI());
 				edge.addInterval(start.getValue().toString(), end.getValue().toString());
 				container.addEdge(edge);
+				resultSize++;
 			}
-
+			System.out.println("processed " + resultSize + " edges");
 		} catch (Exception e) {
 			System.out.println("Error executing edge query:");
 			e.printStackTrace();
@@ -103,6 +116,7 @@ public class SparqlGraphImporter implements Generator {
 		try (QueryExecution qexec = QueryExecutionFactory.sparqlService(sparqlEndpoint, query)) {
 			System.out.println("processing node query results...");				
 			ResultSet results = qexec.execSelect();
+			int resultSize = 0;
 			while (results.hasNext()) {
 				QuerySolution solution = results.next();
 				Resource nodeRes = solution.getResource("node");
@@ -144,8 +158,9 @@ public class SparqlGraphImporter implements Generator {
 					node.setValue("noHintForMe", true);
 				}
 				container.addNode(node);
+				resultSize++;
 			}
-
+			System.out.println("processed " + resultSize + " nodes");
 		} catch (Exception e) {
 			System.out.println("Error executing node query:");
 			e.printStackTrace();

@@ -7,7 +7,9 @@ prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix msg: <http://purl.org/webofneeds/message#>
 prefix won: <http://purl.org/webofneeds/model#>
-prefix s: <http://schema.org/> 
+prefix s: <http://schema.org/>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#> 
+
 select distinct
     ?node ?state ?nodelabel ?nodeweight ?nodetype ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe
 where
@@ -64,6 +66,7 @@ where
         bind (STR(?node) as ?uristr)
         BIND(?created as ?start)
         BIND(now() as ?end)
+        FILTER (?created > "2018-06-01T00:00:00Z"^^xsd:dateTime )
     } 
  } 
 order by ?start
