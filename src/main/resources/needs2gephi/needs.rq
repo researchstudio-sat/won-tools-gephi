@@ -1,4 +1,4 @@
-#for selecting the node info
+# for selecting the node info
 # 1. save as export-node-subjects.csv,
 # 2. add this line to top: Id,label,size,NodeType,URI, Start, End
 # 3. Import into gephi
@@ -11,7 +11,22 @@ prefix s: <http://schema.org/>
 PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#> 
 
 select distinct
-    ?node ?state ?nodelabel ?nodeweight ?nodetype ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe
+     ?node ?state ?nodelabel ?nodeweight ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe (count (?node) as ?cnt)
+      (
+        replace(
+          replace(
+            replace(
+              if(?cnt = 1, 
+                group_concat(?type), 
+                replace(group_concat(?type), "http://purl.org/webofneeds/model#Need", "")
+              ),
+              "http://purl.org/webofneeds/model#","won:"
+            ),
+            "http://schema.org/","s:"
+          ),
+          "\\s*","") 
+        as ?nodetype
+      )
 where
 {
     {
@@ -19,9 +34,10 @@ where
         ?node a won:Need;
            dcterm:created ?created;
            won:isInState ?state.
-        optional {                
-           ?node won:is/dc:title ?isTitle.
-        } 
+        ?node a ?type
+        optional {              
+            ?node won:is?/dc:title ?isTitle.
+        }
         optional {
            ?node won:seeks/dc:title ?seeksTitle.
         }
@@ -31,8 +47,8 @@ where
                   s:longitude ?seeksLon.   
         }
         optional {
-           ?node won:is/won:hasLocation/s:geo ?point.
-           ?point s:latitude ?isLat; 
+            ?node won:is?/(won:hasLocation|s:location|s:jobLocation)/s:geo ?point.
+            ?point s:latitude ?isLat; 
                   s:longitude ?isLon.   
         }        
         optional {
@@ -62,12 +78,9 @@ where
                  ?seeksLon) 
               as ?lon)              
         BIND("1" as ?nodeweight)
-        BIND("need" as ?nodetype)
         bind (STR(?node) as ?uristr)
         BIND(?created as ?start)
         BIND(now() as ?end)
-        FILTER (?created > "2018-06-01T00:00:00Z"^^xsd:dateTime )
+        #FILTER (?created > "2018-06-01T00:00:00Z"^^xsd:dateTime )
     } 
- } 
-order by ?start
-
+ } group by ?node ?state ?nodelabel ?nodeweight ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe

@@ -25,7 +25,7 @@ where
         BIND("conn" as ?edgetype)
         BIND(?mod as ?start)
         BIND(now() as ?end)
-        FILTER (?mod > "2018-06-01T00:00:00Z"^^xsd:dateTime )
+        #FILTER (?mod > "2018-06-01T00:00:00Z"^^xsd:dateTime )
     } 
- } order by ?start 
+ }  
  

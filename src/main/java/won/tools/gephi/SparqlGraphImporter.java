@@ -120,6 +120,9 @@ public class SparqlGraphImporter implements Generator {
 			while (results.hasNext()) {
 				QuerySolution solution = results.next();
 				Resource nodeRes = solution.getResource("node");
+				if (nodeRes == null) {
+				    continue;
+				}
 				Literal label = solution.getLiteral("nodelabel");
 				Resource stateRes = solution.getResource("state");
 				Literal start = solution.getLiteral("start");
@@ -129,6 +132,7 @@ public class SparqlGraphImporter implements Generator {
 				Literal usedForTesting = solution.getLiteral("usedForTesting");
 				Literal noHintForCounterpart = solution.getLiteral("noHintForCounterpart");
 				Literal noHintForMe = solution.getLiteral("noHintForMe");
+				Literal nodetype = solution.getLiteral("nodetype");
 				
 
 				NodeDraft node = container.factory().newNodeDraft(nodeRes.getURI());
@@ -156,6 +160,9 @@ public class SparqlGraphImporter implements Generator {
 				}
 				if (noHintForMe != null) {
 					node.setValue("noHintForMe", true);
+				}
+				if (nodetype != null) {
+				    node.setValue("nodetype",  nodetype.getString());
 				}
 				container.addNode(node);
 				resultSize++;
