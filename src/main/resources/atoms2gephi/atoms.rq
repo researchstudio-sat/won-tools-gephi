@@ -1,0 +1,86 @@
+# for selecting the node info
+# 1. save as export-node-subjects.csv,
+# 2. add this line to top: Id,label,size,NodeType,URI, Start, End
+# 3. Import into gephi
+prefix dcterm: <http://purl.org/dc/terms/>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix msg: <https://w3id.org/won/message#>
+prefix won: <https://w3id.org/won/core#>
+prefix s: <http://schema.org/>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#> 
+
+select distinct
+     ?node ?state ?nodelabel ?nodeweight ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe (count (?node) as ?cnt)
+      (
+        replace(
+          replace(
+            replace(
+              if(?cnt = 1, 
+                group_concat(?type), 
+                replace(group_concat(?type), "https://w3id.org/won/core#Atom", "")
+              ),
+              "https://w3id.org/won/core#","won:"
+            ),
+            "http://schema.org/","s:"
+          ),
+          "\\s*","") 
+        as ?nodetype
+      )
+where
+{
+    {
+        
+        ?node a won:Atom;
+           dcterm:created ?created;
+           won:atomState ?state.
+        ?node a ?type
+        optional {              
+            ?node won:is?/dc:title ?isTitle.
+        }
+        optional {
+           ?node won:seeks/dc:title ?seeksTitle.
+        }
+        optional {
+           ?node won:seeks/won:location/s:geo ?point.
+           ?point s:latitude ?seeksLat; 
+                  s:longitude ?seeksLon.   
+        }
+        optional {
+            ?node won:is?/(won:location|s:location|s:jobLocation)/s:geo ?point.
+            ?point s:latitude ?isLat; 
+                  s:longitude ?isLon.   
+        }        
+        optional {
+            ?node won:flag won:UsedForTesting.
+            bind(true as ?usedForTesting)
+        }
+        optional {
+            ?node won:flag won:NoHintForCounterpart.
+            bind(true as ?noHintForCounterpart)
+        }
+        optional {
+            ?node won:flag won:NoHintForMe.
+            bind(true as ?noHintForMe)
+        }
+        bind (IF(bound(?isTitle),
+                 ?isTitle,
+                 IF (bound(?seeksTitle),
+                     ?seeksTitle,
+                     "no title")) 
+              as ?nodelabel)
+        bind (IF(bound(?isLat),
+                 ?isLat, 
+                 ?seeksLat) 
+              as ?lat)
+        bind (IF(bound(?isLon),
+                 ?isLon, 
+                 ?seeksLon) 
+              as ?lon)              
+        BIND("1" as ?nodeweight)
+        bind (STR(?node) as ?uristr)
+        BIND(?created as ?start)
+        BIND(now() as ?end)
+        #FILTER (?created > "2018-06-01T00:00:00Z"^^xsd:dateTime )
+    } 
+ } group by ?node ?state ?nodelabel ?nodeweight ?uristr ?start ?end ?lat ?lon ?usedForTesting ?noHintForCounterpart ?noHintForMe
