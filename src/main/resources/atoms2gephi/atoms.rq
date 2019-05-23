@@ -1,3 +1,4 @@
+PREFIX match: <https://w3id.org/won/matching#>
 # for selecting the node info
 # 1. save as export-node-subjects.csv,
 # 2. add this line to top: Id,label,size,NodeType,URI, Start, End
@@ -39,10 +40,10 @@ where
             ?node won:is?/dc:title ?isTitle.
         }
         optional {
-           ?node won:seeks/dc:title ?seeksTitle.
+           ?node match:seeks/dc:title ?seeksTitle.
         }
         optional {
-           ?node won:seeks/won:location/s:geo ?point.
+           ?node match:seeks/won:location/s:geo ?point.
            ?point s:latitude ?seeksLat; 
                   s:longitude ?seeksLon.   
         }
@@ -52,15 +53,15 @@ where
                   s:longitude ?isLon.   
         }        
         optional {
-            ?node won:flag won:UsedForTesting.
+            ?node match:flag match:UsedForTesting.
             bind(true as ?usedForTesting)
         }
         optional {
-            ?node won:flag won:NoHintForCounterpart.
+            ?node match:flag match:NoHintForCounterpart.
             bind(true as ?noHintForCounterpart)
         }
         optional {
-            ?node won:flag won:NoHintForMe.
+            ?node match:flag match:NoHintForMe.
             bind(true as ?noHintForMe)
         }
         bind (IF(bound(?isTitle),
